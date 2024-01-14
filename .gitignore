@@ -1,0 +1,9 @@
+# Ignore specific .suo files
+.vs/StoreApi/v17/*.suo
+
+# Ignore Visual Studio Code files
+.vs/
+
+# Ignore compiled C# .NET files
+*/bin/
+*/obj/
