@@ -9,11 +9,12 @@ namespace StoreApi.Repositories
         private readonly ILogger<ProductRepository> _logger;
         private readonly string _baseApiUrl = "https://fakestoreapi.com/products";
 
-        public ProductRepository(HttpClient httpClient, ILogger<ProductRepository> logger
+        public ProductRepository(HttpClient httpClient, ILogger<ProductRepository> logger, IConfiguration configuration
 )
         {
             _httpClient = httpClient;
             _logger = logger;
+            _baseApiUrl = configuration["FakeStoreApi:BaseUrl"];
         }
         public async Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, decimal? minPrice, decimal? maxPrice, string category)
         {
