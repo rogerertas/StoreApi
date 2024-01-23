@@ -7,15 +7,15 @@ namespace StoreApi.Repositories
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<ProductRepository> _logger;
-        private readonly string _baseApiUrl = "https://fakestoreapi.com/products";
+        private readonly string _baseApiUrl;
 
-        public ProductRepository(HttpClient httpClient, ILogger<ProductRepository> logger, IConfiguration configuration
-)
+        public ProductRepository(HttpClient httpClient, ILogger<ProductRepository> logger, IConfiguration configuration)
         {
             _httpClient = httpClient;
             _logger = logger;
             _baseApiUrl = configuration["FakeStoreApi:BaseUrl"];
         }
+
         public async Task<IEnumerable<Product>> GetProductsAsync(int page, int pageSize, decimal? minPrice, decimal? maxPrice, string category)
         {
             if (minPrice < 0 || maxPrice < 0 || (minPrice.HasValue && maxPrice.HasValue && minPrice > maxPrice))
@@ -37,6 +37,19 @@ namespace StoreApi.Repositories
             products = FilterProducts(products, minPrice, maxPrice, category);
 
             var paginatedProducts = PaginateProducts(products, page, pageSize);
+
+            if (!paginatedProducts.Any())
+            {
+                return new List<Product>
+                {
+                    new Product
+                    {
+                        Title = "No products found",
+                        Description = "No products match the specified criteria."
+                    }
+                };
+            }
+
             return paginatedProducts;
         }
 

@@ -3,6 +3,7 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Service registrations
 builder.Services.AddControllers();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddHttpClient();
@@ -14,17 +15,28 @@ builder.Services.AddSwaggerGen(options =>
 
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
-    
     options.IncludeXmlComments(xmlPath);
 });
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// Redirect root to Swagger UI
+app.Use(async (context, next) =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    if (string.IsNullOrEmpty(context.Request.Path.Value) || context.Request.Path.Value == "/")
+    {
+        // Redirect to Swagger UI
+        context.Response.Redirect("/swagger");
+    }
+    else
+    {
+        await next();
+    }
+});
+
 app.UseCors(builder =>
     builder.WithOrigins("http://localhost:3000") // Local React app
            .AllowAnyMethod()
@@ -32,9 +44,7 @@ app.UseCors(builder =>
 );
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
